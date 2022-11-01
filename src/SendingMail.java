@@ -18,11 +18,11 @@ public class SendingMail {
     //사용자 입력 받기
     public static void requestInput() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("ID:");
+        System.out.print("ID (e-mail):");
         user = scanner.next();
-        while (!(user.contains("@naver.com"))) { //메일 형식이 @naver.com일 때까지
-            System.out.println("메일 형식이 다릅니다. 다시 입력하세요.");
-            System.out.print("ID:");
+        while (!(user.contains("@")) || user.endsWith("@")) { //메일 형식일 때까지
+            System.out.println("메일 형식이 아닙니다. 다시 입력하세요.");
+            System.out.print("ID (e-mail):");
             user = scanner.next();
         }
         System.out.print("Password:");
@@ -57,16 +57,17 @@ public class SendingMail {
         String nick = new String(nickname.getBytes(charSet), "8859_1");
         String sub = new String(subject.getBytes(charSet), "8859_1");
         String emailbody = new String(body.getBytes(charSet), "8859_1");
+        String stmpname = user.split("@")[1];
 
         SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket("smtp.naver.com", 465);
+        SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket("smtp." + stmpname, 465);
 
         br = new BufferedReader(new InputStreamReader(sslSocket.getInputStream()));
 
         dataOutputStream = new DataOutputStream(sslSocket.getOutputStream());
 
         System.out.println("-------------EHLO------------");
-        send("EHLO smtp.naver.com\r\n",7);
+        send("EHLO smtp." + stmpname + "\r\n",6);
         System.out.println("------------AUTH LOGIN-------------");
         send("AUTH LOGIN\r\n",1);
         System.out.println("-------------USER------------");
