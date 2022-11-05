@@ -41,32 +41,30 @@ public class SendingMail {
             String tmp = scanner.nextLine();
             if (tmp.equals("end!")) //end! 입력 시 종료
                 break;
-            body += tmp; //입력받은 한 라인 씩 body에 추가
+            body += tmp; //입력받은 한 라인 씩 body 에 추가
             body += "\r\n"; //줄바꿈 개행문자 추가
         }
     }
 
     public static void main(String[] args) throws Exception {
-
-        int delay = 1000;
         String charSet = "UTF-8" ;
-        SSLSocketFactory sslSocketFactory = null;
+        SSLSocketFactory sslSocketFactory;
         SSLSocket sslSocket = null;
 
         requestInput(); //사용자 입력 메서드 호출
 
         String username = Base64.getEncoder().encodeToString(user.getBytes(StandardCharsets.UTF_8));
         String password = Base64.getEncoder().encodeToString(pass.getBytes(StandardCharsets.UTF_8));
-        String nick = new String(nickname.getBytes(charSet), "8859_1");
-        String sub = new String(subject.getBytes(charSet), "8859_1");
-        String emailbody = new String(body.getBytes(charSet), "8859_1");
-        String stmpname = user.split("@")[1];
+        String nick = new String(nickname.getBytes(charSet), StandardCharsets.ISO_8859_1);
+        String sub = new String(subject.getBytes(charSet), StandardCharsets.ISO_8859_1);
+        String emailBody = new String(body.getBytes(charSet), StandardCharsets.ISO_8859_1);
+        String stmpName = user.split("@")[1];
 
         try {
             sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            sslSocket = (SSLSocket) sslSocketFactory.createSocket("smtp." + stmpname, 465);
+            sslSocket = (SSLSocket) sslSocketFactory.createSocket("smtp." + stmpName, 465);
         } catch (UnknownHostException e) {
-            System.out.println("지원하지 않는 이메일 입니다." + stmpname);
+            System.out.println("지원하지 않는 이메일 입니다." + stmpName);
             System.exit(1);
         }
 
@@ -75,7 +73,7 @@ public class SendingMail {
         dataOutputStream = new DataOutputStream(sslSocket.getOutputStream());
 
         System.out.println("-------------EHLO------------");
-        send("EHLO smtp." + stmpname + "\r\n",7);
+        send("EHLO smtp." + stmpName + "\r\n",7);
         System.out.println("------------AUTH LOGIN-------------");
         send("AUTH LOGIN\r\n",1);
         System.out.println("-------------USER------------");
@@ -95,7 +93,7 @@ public class SendingMail {
         System.out.println("----------------To--------------");
         send("To: "+ receiver + "\r\n", 0);
         System.out.println("-------------Email Body------------");
-        send("\r\n"+ emailbody + "\r\n",0);
+        send("\r\n"+ emailBody + "\r\n",0);
         System.out.println("-------------Content------------");
         send(".\r\n",0);
         System.out.println("-------------QUIT------------");
@@ -105,10 +103,12 @@ public class SendingMail {
     }
     private static void send(String s, int no_of_response_line) throws Exception
     {
+        int delay = 1000;
+
         dataOutputStream.writeBytes(s);
         System.out.println("CLIENT: "+s);
-        Thread.sleep(1000);
-        String login = null;
+        Thread.sleep(delay);
+        String login;
 
         for (int i = 0; i < no_of_response_line; i++) {
             login = br.readLine();
