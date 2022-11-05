@@ -1,3 +1,4 @@
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import javax.net.ssl.*;
 import java.io.*;
@@ -20,7 +21,7 @@ public class SendingMail {
         Scanner scanner = new Scanner(System.in);
         System.out.print("ID (e-mail):");
         user = scanner.next();
-        while (!(user.contains("@")) || user.endsWith("@")) { //메일 형식일 때까지
+        while (!user.matches("\\w+@\\w+\\.\\w+(\\.\\w+)?")){ //메일 형식일 때까지
             System.out.println("메일 형식이 아닙니다. 다시 입력하세요.");
             System.out.print("ID (e-mail):");
             user = scanner.next();
@@ -49,6 +50,8 @@ public class SendingMail {
 
         int delay = 1000;
         String charSet = "UTF-8" ;
+        SSLSocketFactory sslSocketFactory = null;
+        SSLSocket sslSocket = null;
 
         requestInput(); //사용자 입력 메서드 호출
 
@@ -59,15 +62,20 @@ public class SendingMail {
         String emailbody = new String(body.getBytes(charSet), "8859_1");
         String stmpname = user.split("@")[1];
 
-        SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket("smtp." + stmpname, 465);
+        try {
+            sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            sslSocket = (SSLSocket) sslSocketFactory.createSocket("smtp." + stmpname, 465);
+        } catch (UnknownHostException e) {
+            System.out.println("지원하지 않는 이메일 입니다." + stmpname);
+            System.exit(1);
+        }
 
         br = new BufferedReader(new InputStreamReader(sslSocket.getInputStream()));
 
         dataOutputStream = new DataOutputStream(sslSocket.getOutputStream());
 
         System.out.println("-------------EHLO------------");
-        send("EHLO smtp." + stmpname + "\r\n",6);
+        send("EHLO smtp." + stmpname + "\r\n",7);
         System.out.println("------------AUTH LOGIN-------------");
         send("AUTH LOGIN\r\n",1);
         System.out.println("-------------USER------------");
@@ -106,8 +114,8 @@ public class SendingMail {
             login = br.readLine();
             System.out.println("SERVER : " + login);
 
-            if (login.contains("Username and Password not accepted")) {
-                System.out.println("로그인이 안 됩니다.");
+            if (login == null || login.contains("Username and Password not accepted")) {
+                System.out.println("로그인 실패.");
                 System.exit(0);
             }
         }
