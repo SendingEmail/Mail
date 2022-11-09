@@ -50,17 +50,15 @@ public class SendingMail {
     }
 
     public static void main(String[] args) throws Exception {
-
-        int delay = 1000;
         String charSet = "UTF-8" ;
 
         requestInput(); //사용자 입력 메서드 호출
 
         String username = Base64.getEncoder().encodeToString(user.getBytes(StandardCharsets.UTF_8));
         String password = Base64.getEncoder().encodeToString(pass.getBytes(StandardCharsets.UTF_8));
-        String nick = new String(nickname.getBytes(charSet), "8859_1");
-        String sub = new String(subject.getBytes(charSet), "8859_1");
-        String emailbody = new String(body.getBytes(charSet), "8859_1");
+        String nick = new String(nickname.getBytes(charSet), StandardCharsets.ISO_8859_1);
+        String sub = new String(subject.getBytes(charSet), StandardCharsets.ISO_8859_1);
+        String emailbody = new String(body.getBytes(charSet), StandardCharsets.ISO_8859_1);
         String msg = "";
 
         SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
@@ -90,9 +88,11 @@ public class SendingMail {
     }
     private static void send(String s, int no_of_response_line) throws Exception
     {
+        int delay = 1000;
+
         dataOutputStream.writeBytes(s);
         System.out.println("CLIENT: "+s);
-        Thread.sleep(1000);
+        Thread.sleep(delay);
         String login = null;
 
         for (int i = 0; i < no_of_response_line; i++) {
